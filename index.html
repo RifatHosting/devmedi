@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator Database Penyakit - MediCore Pro</title>
+  <!-- Load Tailwind CSS dari CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Konfigurasi Tailwind untuk warna dan font (disesuaikan dengan file MediCore Anda) -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Menggunakan palet MediCore: primary: #c53030; secondary: #1a202c;
+            primary: '#c53030', 
+            'primary-dark': '#9b2c2c',
+            'primary-light': '#fff5f5',
+            secondary: '#1a202c',
+            'text-muted': '#718096',
+            'bg-surface': '#f8f8f8', // Latar belakang yang lebih halus
+            'card-light': '#ffffff',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          transitionTimingFunction: {
+            'ease-in-out-smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+          }
+        },
+      }
+    }
+  </script>
+  <style>
+    /* Menggunakan font Inter */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    
+    /* Global styles and transitions for 144FPS feeling */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f8f8;
+      color: #1a202c;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    /* Styling scrollbar untuk estetika modern */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Tambahkan transition ke semua elemen interaktif */
+    .transition-smooth {
+        transition-property: all;
+        transition-duration: 300ms;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Styling khusus untuk input agar terlihat lebih profesional */
+    .form-control {
+      /* Mengganti border dengan focus ring yang lebih halus */
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid #e2e8f0;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #c53030; /* Primary color */
+      box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.2);
+    }
+
+    /* Custom style untuk dropdown Severity */
+    select.form-control {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23718096'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.5em 1.5em;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+
+  <header class="max-w-7xl mx-auto mb-6 md:mb-10 pb-4 border-b border-gray-200">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-primary flex items-center">
+      <svg class="w-8 h-8 md:w-10 md:h-10 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+      Generator Database Penyakit
+    </h1>
+    <p class="mt-1 text-text-muted text-sm md:text-base">Alat Bantu Pembuatan Entri Penyakit untuk MediCore Pro.</p>
+  </header>
+
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Kolom 1: Formulir Input -->
+    <div class="form-container bg-card-light p-6 md:p-8 rounded-2xl shadow-xl transition-shadow hover:shadow-2xl transition-smooth">
+      <h2 class="text-2xl font-bold mb-6 text-secondary border-b pb-3 border-primary-light">
+        1. Detail Data Penyakit
+      </h2>
+      <form id="disease-form">
+        
+        <!-- Nama Penyakit & ID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="form-group">
+            <label for="name" class="block text-sm font-semibold text-secondary mb-2">Nama Penyakit <span class="text-red-500">*</span></label>
+            <input type="text" id="name" class="form-control w-full p-3 rounded-lg text-secondary focus:ring-primary focus:border-primary" required>
+          </div>
+          <div class="form-group">
+            <label for="id" class="block text-sm font-semibold text-secondary mb-2">ID Unik <span class="text-text-muted font-normal">(Slug)</span></label>
+            <input type="text" id="id" class="form-control w-full p-3 rounded-lg bg-gray-50 text-text-muted cursor-not-allowed" readonly required>
+          </div>
+        </div>
+
+        <!-- Keywords & Severity -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div class="form-group md:col-span-2">
+            <label for="keywords" class="block text-sm font-semibold text-secondary mb-2">Keywords <span class="text-text-muted font-normal">(Pisahkan dengan koma)</span></label>
+            <input type="text" id="keywords" class="form-control w-full p-3 rounded-lg text-secondary">
+          </div>
+          <div class="form-group">
+            <label for="severity" class="block text-sm font-semibold text-secondary mb-2">Tingkat Keparahan</label>
+            <select id="severity" class="form-control w-full p-3 rounded-lg text-secondary">
+              <option value="low">Rendah (Hijau)</option>
+              <option value="medium" selected>Sedang (Kuning)</option>
+              <option value="high">DARURAT (Merah)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Gejala & Solusi -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div class="form-group">
+            <label for="symptoms" class="block text-sm font-semibold text-secondary mb-2">Gejala Klinis <span class="text-text-muted font-normal">(Satu gejala per baris)</span></label>
+            <textarea id="symptoms" class="form-control w-full p-3 rounded-lg text-secondary resize-y" rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="solutions" class="block text-sm font-semibold text-secondary mb-2">Solusi & Tindakan Medis <span class="text-text-muted font-normal">(Satu solusi per baris)</span></label>
+            <textarea id="solutions" class="form-control w-full p-3 rounded-lg text-secondary resize-y" rows="5"></textarea>
+          </div>
+        </div>
+        
+        <!-- Bagian Input Obat yang Dinamis -->
+        <div class="form-group mb-5 p-5 border border-gray-200 rounded-xl bg-gray-50">
+          <label class="block text-lg font-bold text-secondary mb-4">Rekomendasi Obat <span class="text-text-muted text-sm font-normal">(Opsional)</span></label>
+          <div class="medication-group">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input type="text" id="med-name" placeholder="Nama Obat" class="form-control p-3 rounded-lg">
+              <input type="text" id="med-dose" placeholder="Dosis (cth: 500mg/hari)" class="form-control p-3 rounded-lg">
+              <input type="text" id="med-desc" placeholder="Deskripsi Singkat/Fungsi" class="form-control p-3 rounded-lg sm:col-span-3">
+            </div>
+            
+            <button type="button" id="add-med-button" class="btn bg-primary-light text-primary hover:bg-red-100 transition-smooth font-semibold py-2 px-4 rounded-lg text-sm mt-3 w-full sm:w-auto">
+              + Tambahkan Obat
+            </button>
+            
+            <div id="medications-list" class="mt-4 flex flex-col gap-2">
+              <!-- Daftar obat yang ditambahkan akan muncul di sini -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Dokter & Kapan Harus ke Dokter -->
+        <div class="form-group mb-5">
+          <label for="doctors" class="block text-sm font-semibold text-secondary mb-2">Tim Medis/Dokter <span class="text-text-muted font-normal">(Pisahkan dengan koma)</span></label>
+          <input type="text" id="doctors" class="form-control w-full p-3 rounded-lg text-secondary">
+        </div>
+        <div class="form-group mb-5">
+          <label for="whenToSeeDoctor" class="block text-sm font-semibold text-secondary mb-2">Kapan Harus ke Dokter <span class="text-text-muted font-normal">(Peringatan penting)</span></label>
+          <textarea id="whenToSeeDoctor" class="form-control w-full p-3 rounded-lg text-secondary resize-y" rows="3"></textarea>
+        </div>
+        
+        <!-- Tombol Aksi -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
+          <button type="submit" id="generate-button" class="btn bg-primary text-white hover:bg-primary-dark transition-smooth font-bold py-3 px-6 rounded-xl shadow-lg shadow-red-300/50 flex-1">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Generate Kode Database
+          </button>
+          <button type="button" id="reset-button" class="btn bg-gray-200 text-secondary hover:bg-gray-300 transition-smooth font-semibold py-3 px-6 rounded-xl flex-1">
+            Reset Formulir
+          </button>
+        </div>
+        
+      </form>
+    </div>
+
+    <!-- Kolom 2: Output Kode -->
+    <div class="output-container bg-card-light p-6 md:p-8 rounded-2xl shadow-xl transition-smooth">
+      <h2 class="text-2xl font-bold mb-6 text-secondary border-b pb-3 border-primary-light">
+        2. Hasil Kode JavaScript (JSON)
+      </h2>
+      <p class="text-text-muted text-sm mb-4 bg-yellow-50/50 p-3 rounded-lg border border-yellow-200">
+        <strong class="text-yellow-700">PENTING:</strong> Salin kode di bawah ini, dan tempelkan sebagai objek baru di dalam array 
+        <code>DISEASE_DATABASE</code> di file JavaScript/HTML Anda. Jangan lupa koma (,) pemisah.
+      </p>
+      
+      <textarea id="output-code" readonly placeholder="{ /* Hasil kode JSON akan muncul di sini setelah menekan Generate */ }"
+        class="font-mono text-sm w-full h-96 p-4 rounded-xl border-2 border-gray-200 bg-gray-50 focus:border-primary focus:ring-primary transition-smooth"
+      ></textarea>
+      
+      <button type="button" id="copy-button" class="btn bg-secondary text-white hover:bg-gray-800 transition-smooth font-bold py-3 px-6 rounded-xl shadow-lg shadow-gray-400/50 w-full mt-4">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5h4m7 0h-4M7 9h5m-5 4h8m-8 4h8"></path></svg>
+        Salin Kode ke Clipboard
+      </button>
+      
+    </div>
+    
+  </main>
+
+  <script>
+    // Pastikan skrip berjalan setelah DOM dimuat sepenuhnya
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // State global untuk menyimpan daftar obat
+      let medications = [];
+
+      const form = document.getElementById('disease-form');
+      const nameInput = document.getElementById('name');
+      const idInput = document.getElementById('id');
+      const addMedButton = document.getElementById('add-med-button');
+      const medListContainer = document.getElementById('medications-list');
+      const outputCode = document.getElementById('output-code');
+      const copyButton = document.getElementById('copy-button');
+      const resetButton = document.getElementById('reset-button');
+      
+      // Helper untuk membuat ID unik (slug) dari nama
+      const generateSlug = (text) => {
+        if (!text) return '';
+        return text
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9\s-]/g, '') // Hapus karakter spesial
+          .replace(/[\s_-]+/g, '-')     // Ganti spasi/underscore dengan -
+          .replace(/^-+|-+$/g, '');   // Hapus - di awal/akhir
+      };
+      
+      // Helper untuk memecah string berdasarkan koma, membersihkan, dan mengembalikan array
+      const splitByComma = (text) => {
+        if (!text.trim()) return [];
+        return text.split(',')
+                   .map(item => item.trim())
+                   .filter(Boolean); 
+      };
+      
+      // Helper untuk memecah string berdasarkan baris baru, membersihkan, dan mengembalikan array
+      const splitByNewline = (text) => {
+        if (!text.trim()) return [];
+        // Gunakan regex untuk menangani berbagai jenis baris baru (\n, \r\n)
+        return text.split(/\r?\n/)
+                   .map(item => item.trim())
+                   .filter(Boolean); 
+      };
+
+      // 1. Otomatis buat ID dari Nama Penyakit
+      nameInput.addEventListener('input', () => {
+        idInput.value = generateSlug(nameInput.value);
+      });
+
+      // 2. Logika Tambah Obat
+      addMedButton.addEventListener('click', () => {
+        const medName = document.getElementById('med-name').value.trim();
+        const medDose = document.getElementById('med-dose').value.trim();
+        const medDesc = document.getElementById('med-desc').value.trim();
+        
+        if (!medName || !medDose || !medDesc) {
+          // Ganti alert() dengan pesan di UI yang lebih halus jika perlu, 
+          // tapi untuk kesederhanaan, kita gunakan alert untuk feedback wajib.
+          alert('Harap isi semua field obat (Nama, Dosis, dan Deskripsi).');
+          return;
+        }
+        
+        // Buat objek obat
+        const medicationObject = {
+          name: medName,
+          dose: medDose,
+          desc: medDesc
+        };
+        
+        // Tambahkan ke state
+        medications.push(medicationObject);
+        
+        // Render ulang daftar obat di UI
+        renderMedicationsList();
+        
+        // Kosongkan field input obat
+        document.getElementById('med-name').value = '';
+        document.getElementById('med-dose').value = '';
+        document.getElementById('med-desc').value = '';
+        document.getElementById('med-name').focus();
+      });
+      
+      // Fungsi untuk merender daftar obat di UI
+      const renderMedicationsList = () => {
+        medListContainer.innerHTML = ''; // Kosongkan dulu
+        
+        medications.forEach((med, index) => {
+          const medItem = document.createElement('div');
+          medItem.className = 'med-item bg-white p-3 rounded-lg border-l-4 border-primary shadow-sm flex justify-between items-center transition-smooth hover:shadow-md';
+          medItem.innerHTML = `
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-sm text-secondary truncate">${med.name} <span class="text-xs font-medium text-text-muted ml-1">(${med.dose})</span></p>
+              <p class="text-xs text-gray-500 mt-0.5 truncate">${med.desc}</p>
+            </div>
+            <button type="button" data-index="${index}" class="remove-med-button text-lg text-red-500 hover:text-red-700 ml-3 transition-smooth" title="Hapus Obat">
+              &times;
+            </button>
+          `;
+          medListContainer.appendChild(medItem);
+        });
+
+        // Tampilkan placeholder jika daftar kosong
+        if (medications.length === 0) {
+            medListContainer.innerHTML = '<p class="text-center text-text-muted text-sm italic py-4">Belum ada obat yang ditambahkan.</p>';
+        }
+      };
+      
+      // Inisialisasi daftar obat (agar placeholder tampil)
+      renderMedicationsList();
+      
+      // 3. Logika Hapus Obat (Event Delegation)
+      medListContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-med-button')) {
+          const indexToRemove = parseInt(e.target.dataset.index, 10);
+          // Hapus dari state
+          medications.splice(indexToRemove, 1);
+          // Render ulang
+          renderMedicationsList();
+        }
+      });
+
+      // 4. Logika Utama: Generate Kode
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        try {
+          // Kumpulkan semua data dari form
+          const diseaseObject = {
+            id: document.getElementById('id').value.trim(),
+            name: document.getElementById('name').value.trim(),
+            keywords: splitByComma(document.getElementById('keywords').value),
+            severity: document.getElementById('severity').value,
+            symptoms: splitByNewline(document.getElementById('symptoms').value),
+            solutions: splitByNewline(document.getElementById('solutions').value),
+            medications: medications, // Ambil dari state
+            doctors: splitByComma(document.getElementById('doctors').value),
+            whenToSeeDoctor: document.getElementById('whenToSeeDoctor').value.trim()
+          };
+          
+          // Validasi dasar
+          if (!diseaseObject.id || !diseaseObject.name) {
+            alert('Nama Penyakit dan ID Unik wajib diisi.');
+            return;
+          }
+          
+          // Ubah objek JS menjadi string JSON yang rapi
+          // JSON.stringify(value, replacer, space)
+          const jsonString = JSON.stringify(diseaseObject, null, 2); 
+          
+          // Tampilkan di textarea output
+          outputCode.value = jsonString;
+          
+          // Scroll ke output untuk visibilitas
+          document.querySelector('.output-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (error) {
+          alert('Terjadi error saat membuat kode: ' + error.message);
+          outputCode.value = 'Error: ' + error.message;
+        }
+      });
+      
+      // 5. Logika Tombol Salin
+      copyButton.addEventListener('click', () => {
+        if (!outputCode.value) {
+          alert('Tidak ada kode untuk disalin. Generate dulu!');
+          return;
+        }
+        
+        outputCode.select();
+        // Gunakan document.execCommand untuk kompatibilitas iframe
+        document.execCommand('copy');
+        
+        // Beri feedback visual
+        copyButton.textContent = 'Kode Berhasil Disalin!';
+        copyButton.classList.remove('bg-secondary', 'hover:bg-gray-800');
+        copyButton.classList.add('bg-green-600', 'hover:bg-green-700');
+        
+        setTimeout(() => {
+          copyButton.textContent = 'Salin Kode ke Clipboard';
+          copyButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+          copyButton.classList.add('bg-secondary', 'hover:bg-gray-800');
+        }, 2000);
+      });
+      
+      // 6. Logika Tombol Reset
+      resetButton.addEventListener('click', () => {
+        // Ganti confirm() dengan modal UI jika ini aplikasi produksi.
+        if (confirm('Anda yakin ingin mengosongkan semua field?')) {
+          form.reset();
+          outputCode.value = '';
+          medications = []; // Kosongkan state obat
+          renderMedicationsList(); // Kosongkan UI daftar obat
+          nameInput.focus();
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>
